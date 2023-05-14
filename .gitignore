@@ -18,4 +18,9 @@ __pycache__/
 # Script for i18n
 *.bat
 
+# Voice files
+*.mp3
+
+# Whisper model
+model/
 

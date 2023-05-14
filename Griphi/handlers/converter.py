@@ -1,19 +1,39 @@
-import logging
-from aiogram import Bot, Dispatcher, Router
-from aiogram.types import InlineQuery
-from aiogram.types import InlineQueryResultArticle, InputTextMessageContent, InputMessageContent
+import os
+from aiogram import Router, F, Bot
+from aiogram.filters import Command
+from aiogram.types import Message
+from aiogram.utils.i18n import I18n, SimpleI18nMiddleware
+from aiogram.utils.i18n import gettext as _
+from aiogram.methods.get_file import GetFile
+
 from Griphi.env.env_reader import get_token
+from Griphi.speech.app import get_transcribe
+from Griphi.code_generator import generator
+
 
 router = Router()
+i18n = I18n(path="locales", default_locale="en", domain="messages")
+router.message.middleware(SimpleI18nMiddleware(i18n))
+bot = Bot(token=get_token())
 
-@router.inline_query()
-async def echo_inline(inline_query: InlineQuery):
-    query_text = inline_query.query
-    if not query_text:
-        return
-    results = []
-    results.append(InlineQueryResultArticle(id='1',
-                                            title='Echo',
-                                            input_message_content=InputTextMessageContent(message_text=query_text)))
+@router.message(Command("start"))
+async def start(message: Message) -> None:
+    await message.answer(_("Hello, I'm Griphi.\nI can convert your voice messages to text"))
 
-    await inline_query.answer(results=results, cache_time=1)
+
+@router.message(F.voice)
+async def echo_inline(message: Message):
+    file_id = message.voice.file_id
+    file = await GetFile(file_id=file_id)
+    file_path = file.file_path
+    code = await generator()
+
+    path = f"C:\\GitHub\\GriphiBot\\Griphi\\speech\\{code}.mp3"
+    await bot.download_file(file_path=file_path,
+                            destination=path)
+    await message.reply(text=_("I got ur voice message. Please, wait..."))
+
+    audio_file_name = f"{code}.mp3"
+    transcribe = get_transcribe(audio_file_name)
+    await message.answer(text=transcribe)
+    os.remove(path)
