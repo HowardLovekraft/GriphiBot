@@ -24,3 +24,6 @@ __pycache__/
 # Whisper model
 model/
 
+# Info with paths
+info.py
+

@@ -1,12 +1,13 @@
 import asyncio
 from aiogram import Bot, Dispatcher
+from aiogram.fsm.storage.memory import MemoryStorage
 from handlers import converter
 
 from Griphi.env.env_reader import get_token
 
 async def main():
     bot = Bot(token=get_token())
-    dp = Dispatcher()
+    dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(converter.router)
 
     print("BOT --> WORKS")
