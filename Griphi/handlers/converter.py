@@ -8,11 +8,11 @@ from aiogram.methods.get_file import GetFile
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 
-from Griphi.env.env_reader import get_token
-from Griphi.speech.app import get_transcribe
-from Griphi.other.code_generator import generator
-from Griphi.other.info import BASE_DIR
-from Griphi.keyboards.queue_kb import get_accept
+from env.env_reader import get_token
+from speech.app import get_transcribe
+from other.code_generator import generator
+from other.info import BASE_DIR
+from keyboards.queue_kb import get_accept
 
 bot = Bot(token=get_token())
 router = Router()
@@ -22,17 +22,15 @@ router.callback_query.middleware(SimpleI18nMiddleware(i18n))
 
 
 class Transcriber(StatesGroup):
-    get_media = State()
     work_media = State()
 
 @router.message(Command("start"))
 async def start(message: Message, state: FSMContext) -> None:
     await message.answer(_("Hello, I'm Griphi.\nI can convert your voice messages and video notes to text.\n"
                            "To start, just forward to me a media file"))
-    await state.set_state(Transcriber.get_media)
 
 
-@router.message(F.voice, Transcriber.get_media)
+@router.message(F.voice)
 async def get_voice(message: Message, state: FSMContext) -> None:
     file_id = message.voice.file_id
     file = await GetFile(file_id=file_id)
@@ -45,8 +43,8 @@ async def get_voice(message: Message, state: FSMContext) -> None:
                         reply_markup=get_accept())
     await state.set_state(Transcriber.work_media)
 
-@router.message(F.video_note, Transcriber.get_media)
-async def get_video(message: Message, state: FSMContext) -> None:
+@router.message(F.video_note)
+async def get_video_note(message: Message, state: FSMContext) -> None:
     file_id = message.video_note.file_id
     file = await GetFile(file_id=file_id)
 
@@ -58,10 +56,21 @@ async def get_video(message: Message, state: FSMContext) -> None:
     await state.set_state(Transcriber.work_media)
 
 
-@router.message(~(F.voice | F.video_note))
+@router.message(F.video)
+async def get_video_file(message: Message, state: FSMContext) -> None:
+    file_id = message.video.file_id
+    file = await GetFile(file_id=file_id)
+
+    data = await state.get_data()
+    data["file"] = file.file_path
+    await state.set_data(data)
+    await message.reply(text="I got ur video file. Do u want to start transcribing?",
+                        reply_markup=get_accept())
+    await state.set_state(Transcriber.work_media)
+
+@router.message(~(F.voice | F.video_note| F.video))
 async def get_not_media(message: Message) -> None:
-    await message.delete()
-    await message.answer(_("Please, send me only voice messages/video notes"))
+    await message.reply(_("Please, send me only voice messages/video notes"))
 
 @router.callback_query(Transcriber.work_media)
 async def work_media(callback: CallbackQuery, state: FSMContext) -> None:
@@ -90,4 +99,3 @@ async def work_media(callback: CallbackQuery, state: FSMContext) -> None:
         await callback.message.edit_text(_("You canceled the process"))
 
     await state.clear()
-    await state.set_state(Transcriber.get_media)

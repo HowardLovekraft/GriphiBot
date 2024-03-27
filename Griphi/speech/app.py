@@ -1,6 +1,6 @@
 import os
 import whisper
-from Griphi.other.info import BASE_DIR
+from other.info import BASE_DIR
 
 model = whisper.load_model("small").cuda()
 

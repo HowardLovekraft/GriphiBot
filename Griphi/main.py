@@ -3,7 +3,7 @@ from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
 from handlers import converter
 
-from Griphi.env.env_reader import get_token
+from env.env_reader import get_token
 
 async def main():
     bot = Bot(token=get_token())
