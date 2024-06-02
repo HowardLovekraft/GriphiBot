@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "griphibot"
+version = "1.1.0"
+description = "Transcribe Telegram's voice messages, videos and video notes!"
+authors = ["HowardLovekraft <117375241+HowardLovekraft@users.noreply.github.com>"]
+license = "MIT License 2023"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+aiogram = {extras = ["i18n"], version = "^3.6.0"}
+openai-whisper = {git = "https://github.com/openai/whisper.git"}
+python-dotenv = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

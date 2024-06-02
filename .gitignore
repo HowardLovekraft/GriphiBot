@@ -28,3 +28,6 @@ model/
 info.py
 
 Build/
+
+# Starter file
+*.bat
