@@ -59,7 +59,6 @@ async def get_video_note(message: Message, state: FSMContext) -> None:
 async def get_video_file(message: Message, state: FSMContext) -> None:
     file_id = message.video.file_id
     file = await bot.get_file(file_id=file_id)
-
     data = await state.get_data()
     data["file"] = file.file_path
     await state.set_data(data)
