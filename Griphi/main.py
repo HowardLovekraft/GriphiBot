@@ -13,7 +13,7 @@ async def main():
     print("STORAGE --> WORKS")
 
     await bot.delete_webhook(drop_pending_updates=True)
-    print("BOT     --> WORKS")
+    print("BOT     --> WORKS") # Бот работает
 
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
 
@@ -21,4 +21,4 @@ if __name__ == '__main__':
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Bot was stopped by Ctrl-C")
+        print("Bot was stopped by Ctrl-C") # Бот был остановлен
